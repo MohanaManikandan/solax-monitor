@@ -40,8 +40,9 @@ readings fit in one: `index = 4`. A number that outgrows one slot is split
 across two like an odometer with two wheels. The low slot counts up to 65,535
 and wraps to zero, the high slot counts the wraps, and the value is
 low + 65,536 × high. The lifetime total is written that way, low slot first:
-`index = [19, 20]`. In September 2026 those slots read 18,717 and 0, which is
-1,871.7 kWh; the high slot first ticks over at 6,553.6 kWh.
+`index = [19, 20]`. For instance, in the tested environment, in September 2026 
+those slots read 18,717 and 0, which is 1,871.7 kWh; the high slot first ticks
+over at 6,553.6 kWh.
 
 `signed = true` marks a number that can go below zero, such as grid current
 and power. A slot has no room for a minus sign, so the top half of its range
