@@ -243,7 +243,7 @@ Without Docker: `cargo run`, with `config.toml` in the working directory.
 | `/api/v1/...` | the API, described under API v1 below |
 | `/healthz` | the one route with no token |
 
-## Notes on this inverter
+## Notes on the inverter used for testing
 
 Confirmed against the device: type 22, dongle `SRXXXXXXX`, inverter
 `XMXXXXXXX`, 103 values in `Data`.
