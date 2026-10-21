@@ -23,7 +23,7 @@ By correlating live inverter telemetry with temperature and power output, I iden
 
 The inverter relies on a passively cooled, finned enclosure:
 
-![Rear cooling-fin arrangement of the SolaX X1 Mini G4](docs/images/solax-inverter.webp)
+![Rear cooling-fin arrangement of the SolaX X1 Mini G4](docs/images/solax-inverter.jpg)
 
 Rather than modifying the inverter's internals, I engineered an external active-cooling system using five high-speed DC fans: three top-mounted fans exhaust hot air, while two bottom-mounted fans, angled at 30° and 60°, direct airflow upwards.
 
