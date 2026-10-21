@@ -14,9 +14,8 @@ The project is organised as a Rust workspace with a server, shared API types, an
 
 See [`server/README.md`](server/README.md) for server configuration, the metrics registry, polling behaviour, storage, and API details.
 
-## Compatibility
-
-Tested with the **SolaX X1 Mini G4 inverter configured for a maximum output of 3.3KW**. Compatibility with other SolaX inverter models has not been verified.
+> [!IMPORTANT]
+> This is tested with the **SolaX X1 Mini G4 inverter configured for a maximum output of 3.3KW**. Compatibility with other SolaX inverter models has not been verified.
 
 ### Thermal derating: from diagnosis to measurable results
 
