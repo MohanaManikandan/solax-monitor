@@ -1,4 +1,4 @@
-# solax
+# solax-monitor
 
 A self-hosted SolaX inverter monitor. It polls the inverter over the local network, stores readings in SQLite, and serves a web dashboard for live power, energy generation, and historical trends.
 
