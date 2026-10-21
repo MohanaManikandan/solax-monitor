@@ -2,6 +2,8 @@
 
 A self-hosted SolaX inverter monitor. It polls the inverter over the local network, stores readings in SQLite, and serves a web dashboard for live power, energy generation, and historical trends.
 
+![Solax Dashboard](docs/images/dashboard.png)
+
 The project is organised as a Rust workspace with a server, shared API types, and a TypeScript frontend.
 
 | Path | What it is |
@@ -31,6 +33,12 @@ Rather than modifying the inverter's internals, I engineered an external active-
 - **Sustained peak output:** maintains 3.3 kW instead of recurring midday drops to around 2.4 kW.
 - **Low power overhead:** five fans drawing a maximum of 0.1 A at 230V AC, operating from 7 AM to 5 PM.
 - **Estimated 15–20% increase in daily generation:** attributed to reducing thermal derating during peak production hours.
+
+#### Before active cooling:
+![Metrics captured with passive cooling](docs/images/derating.png)
+
+#### After active cooling
+![Metrics captured with active cooling](docs/images/active-cooling.png)
 
 The monitoring system captures live telemetry and historical readings, making it possible to investigate the relationship between temperature and power output and evaluate the effects of the cooling intervention.
 
