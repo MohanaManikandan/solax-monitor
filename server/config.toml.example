@@ -1,0 +1,67 @@
+# Copy to config.toml and chmod 600. config.toml holds the dongle serial,
+# which is also the local API password, so it must never be world readable.
+
+[inverter]
+# Host, host:port or [v6]:port. Must resolve to a private, loopback or
+# link-local address unless allow_public_address is turned on.
+#
+# Pin this in the router as a DHCP reservation against the dongle's MAC,
+# 68:67:25:d4:72:de. The dongle powers down with the inverter at sunset, so
+# it re-requests a lease every morning; without a reservation the address can
+# move and this file quietly becomes wrong. Recovering automatically is not
+# possible from the ARP table alone, because the entry ages out overnight.
+address = "192.168.29.10"
+
+# Sent as pwd= on every request and checked against the sn field of the
+# reply. This is the Pocket WiFi dongle serial, not the inverter serial.
+dongle_serial = "SRXXXXXXX"
+
+# Information[2]. Identity only, never sent to the device.
+inverter_serial = "XMXXXXXXXXX"
+
+# The nameplate rating. Data[22] reports 3000 W on this unit, matching
+# Information[0] = 3.000.
+rating_kw = 3.0
+
+# The most the inverter actually delivers, which the capacity meter and the
+# chart's limit line use, and the Month screen's time at the limit counts
+# against. This unit's limit is 3.3 kW. Leave out to use rating_kw.
+max_output_kw = 3.3
+
+# The output the inverter steps down to when it runs too hot, which the day
+# summaries count as heat derating. This unit steps to exactly three quarters
+# of its limit, 2.475 kW, at about 85 C. Leave out to use 75% of
+# max_output_kw.
+# derated_output_kw = 2.475
+
+poll_interval_seconds = 10
+allow_public_address = false
+
+# Local times bounding the hours worth polling, in the timezone below. After
+# dark the inverter powers down and the dongle stops answering, so polling
+# would only manufacture a failed request and a warning line every minute.
+# Leave both out to poll around the clock. Written the other way round, for
+# example "22:00" to "06:00", the window wraps midnight.
+poll_from = "05:00"
+poll_until = "19:00"
+
+[server]
+bind = "0.0.0.0:8080"
+
+# Every request needs this token. Pass it once as ?token=... and it is
+# stored in a cookie. Generate with: openssl rand -hex 16
+token = "change-me"
+
+[storage]
+database_path = "/app/solax-data/solax.db"
+timezone = "Asia/Kolkata"
+
+[site]
+# kg of CO2 per kWh of grid electricity displaced, for the CO2 avoided
+# figures. India's grid is about 0.71.
+co2_kg_per_kwh = 0.71
+
+# The panels' combined peak power, which specific yield divides by: five
+# 610 Wp panels and one 615 Wp make 3.665 kWp. Leave out to divide by the
+# inverter's rating instead.
+panel_kwp = 3.665

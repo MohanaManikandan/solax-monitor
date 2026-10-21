@@ -1,0 +1,757 @@
+/* Palette carried over from the Tkinter app so the two look like the same
+   product. The layout does not follow it: this is a fluid grid rather than a
+   fixed sidebar beside a canvas, so it folds to one column on a phone. */
+:root {
+  --night: #000000;
+  --surface: #0e0e0e;
+  --well: #060606;
+  --hairline: #262626;
+  --text: #f4f4f4;
+  --muted: #a3a3a3;
+  --faint: #737373;
+  --sun: #ffc24d;
+  --ember: #ff8f4c;
+  --mains: #4fd6c8;
+  --alert: #ff5f7e;
+  --radius: 14px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--night);
+  color: var(--text);
+  font-family: Inter, "SF Pro Display", "Segoe UI", system-ui, "Helvetica Neue", Arial, sans-serif;
+  font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased;
+}
+
+.page {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: clamp(16px, 3vw, 28px);
+  display: grid;
+  gap: 16px;
+}
+
+.topbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.identity h1 { margin: 0; font-size: 20px; letter-spacing: 0.01em; }
+.identity p { margin: 2px 0 0; font-size: 12px; color: var(--faint); }
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border: 1px solid var(--hairline);
+  border-radius: 999px;
+  background: var(--surface);
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--faint);
+  box-shadow: 0 0 0 0 transparent;
+}
+
+.pill.live .dot { background: var(--mains); --pulse: var(--mains); }
+.pill.live.beat .dot { animation: pulse 2s ease-out 1; }
+.pill.live { color: var(--text); }
+.pill.error .dot { background: var(--alert); animation: none; }
+.pill.error { color: var(--alert); border-color: color-mix(in srgb, var(--alert) 45%, var(--hairline)); }
+.pill.stale .dot { background: var(--sun); }
+.pill.stale { color: var(--sun); }
+
+/* Asleep is a working state, not a warning: no pulse, no alarm colour. */
+.pill.asleep .dot { background: var(--faint); animation: none; }
+.pill.asleep { color: var(--muted); }
+
+/* One keyframe for every pulsing dot. The colour comes from a property set
+   on the dot itself, so live, fault and warn each radiate their own. */
+@keyframes pulse {
+  0%   { box-shadow: 0 0 0 0 color-mix(in srgb, var(--pulse) 55%, transparent); }
+  100% { box-shadow: 0 0 0 9px transparent; }
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius);
+  padding: clamp(16px, 2.4vw, 22px);
+}
+
+.card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.card-head h2 { margin: 0; font-size: 13px; font-weight: 600; }
+
+.hero {
+  background: linear-gradient(160deg,
+    color-mix(in srgb, var(--sun) 7%, var(--surface)),
+    var(--surface) 62%);
+}
+
+.hero-caption {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* Not .muted: that class carries a 10px top margin for paragraph use, which
+   dropped the timestamp below the dot beside it. */
+#updated { color: var(--faint); line-height: 1; }
+
+.updated-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  /* Room for the halo to expand into, so the ring does not shove the
+     timestamp sideways on every reading. */
+  padding-left: 3px;
+}
+
+/* One-shot blink each time a reading lands, so an arrival is visible even
+   when the numbers happen not to move. */
+.tick {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--faint);
+  flex: none;
+  transform-origin: center;
+}
+
+/* The dot and the timestamp flash together: the dot carries the motion, the
+   text carries the colour, so an arrival reads as one event. */
+.updated-group.flash .tick {
+  animation: tick-flash 1900ms cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+
+.updated-group.flash #updated {
+  animation: stamp-flash 1900ms cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+
+@keyframes stamp-flash {
+  0%   { color: var(--sun); }
+  30%  { color: var(--sun); }
+  100% { color: var(--faint); }
+}
+
+@keyframes tick-flash {
+  0% {
+    transform: scale(1);
+    background: var(--sun);
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--sun) 70%, transparent);
+  }
+  30% {
+    transform: scale(1.75);
+    background: var(--sun);
+    box-shadow: 0 0 0 6px color-mix(in srgb, var(--sun) 24%, transparent);
+  }
+  70% {
+    transform: scale(1);
+    background: var(--sun);
+    box-shadow: 0 0 0 16px transparent;
+  }
+  100% {
+    transform: scale(1);
+    background: var(--faint);
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+
+body.stale .tick { background: var(--alert); animation: none; }
+
+.hero-number {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 6px 0 14px;
+}
+
+#hero-value, .period-sum {
+  font-size: clamp(44px, 11vw, 68px);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.hero-unit { font-size: 13px; color: var(--muted); }
+
+/* The track carries a faint gold outline so the empty part of the bar is
+   visible against the card, not just the filled part. Height includes the
+   border, so the fill stays the 8px it was. */
+.meter {
+  height: 10px;
+  border: 1px solid color-mix(in srgb, var(--sun) 28%, var(--hairline));
+  border-radius: 999px;
+  background: var(--well);
+  overflow: hidden;
+}
+
+.meter-fill {
+  height: 100%;
+  width: 0;
+  border-radius: 999px;
+  background: var(--sun);
+  transition: width 420ms ease, background-color 300ms ease;
+}
+
+.meter-fill.ceiling { background: var(--ember); }
+
+/* Numbers worth reading without hunting through a section. They sit on the
+   hero card so the day's total is answerable at a glance. */
+.hero-extras {
+  display: grid;
+  gap: 2px;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--hairline);
+}
+
+.hero-extras:empty { display: none; }
+
+.hero-extra {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.hero-extra .label { font-size: 12px; color: var(--muted); }
+
+.hero-extra .value {
+  font-size: 26px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+.hero-extra .value .unit {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--faint);
+  margin-left: 5px;
+}
+
+/* Context rather than headline: present, but not competing with today's
+   figure directly above it. */
+.hero-extra.subtle { margin-top: 2px; }
+.hero-extra.subtle .label { color: var(--faint); }
+
+.hero-extra.subtle .value {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+body.stale .hero-extra .value { color: var(--faint); }
+
+.sections {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+.section-title {
+  font-size: 13px;
+  font-weight: 600;
+  margin: 0 0 10px;
+}
+
+.section-title.solar { color: var(--sun); }
+.section-title.grid { color: var(--mains); }
+.section-title.inverter { color: var(--muted); }
+.section-title.system { color: var(--faint); }
+
+.stat {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 7px 0;
+  border-top: 1px solid color-mix(in srgb, var(--hairline) 60%, transparent);
+  font-size: 13px;
+}
+
+.stat:first-of-type { border-top: 0; }
+.stat[hidden] { display: none; }
+
+/* The label takes the slack and wraps; the reading never does. A row
+   carrying a long note would otherwise squeeze the value column until the
+   unit broke onto its own line. */
+.stat .name {
+  color: var(--muted);
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.stat .reading {
+  font-weight: 600;
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+.stat .note {
+  display: block;
+  margin-top: 2px;
+  font-size: 11px;
+  line-height: 1.35;
+  color: var(--faint);
+  font-weight: 400;
+}
+
+/* A peak is a different kind of number from the reading above it: an
+   aggregate over the day rather than a live value. Tinting it says so
+   without needing a word. */
+/* A faulted run mode is the one value on the page that should not read as
+   calmly as the healthy numbers beside it. */
+.stat.fault .reading { color: var(--alert); font-weight: 700; }
+.stat.fault .name { color: color-mix(in srgb, var(--alert) 55%, var(--muted)); }
+
+/* Running on backup: notable, not broken. */
+.stat.warn .reading { color: var(--sun); font-weight: 700; }
+.stat.warn .name { color: color-mix(in srgb, var(--sun) 50%, var(--muted)); }
+
+/* Live value and today's peak share one row, reading as "240.0 V / 260.0 V".
+   Gold marks the peak, so the pair needs no label saying which is which. */
+.stat .reading .live { color: var(--text); }
+.stat .reading .top { color: var(--sun); }
+
+.stat .reading .sep {
+  color: var(--faint);
+  font-weight: 400;
+  margin: 0 4px;
+}
+
+.stat .reading .unit {
+  font-weight: 400;
+  color: var(--faint);
+  margin-left: 3px;
+}
+
+/* The unit belongs to the half it sits in. Left grey, the peak's unit read as
+   though it had come loose from its number. Tinted rather than full gold, so
+   it stays subordinate the way the live half's unit is. */
+.stat .reading .top .unit {
+  color: color-mix(in srgb, var(--sun) 70%, var(--faint));
+}
+
+/* A faulted run mode outranks the usual colours on its own row. */
+.stat.fault .reading .live { color: var(--alert); }
+.stat.warn .reading .live { color: var(--sun); }
+
+.chart-card { min-width: 0; }
+
+/* The key to the stretches marked on the power chart, each swatch the
+   colour of its strip along the chart's foot. Padding, not margins: the
+   chart's sizing counts this box even while it is hidden. */
+.chart-key { display: flex; flex-wrap: wrap; gap: 4px 16px; padding: 8px 0 2px; font-size: 12px; color: var(--muted); }
+.chart-key[hidden], .chart-key .key[hidden] { display: none; }
+.chart-key .key { display: inline-flex; align-items: center; gap: 6px; }
+.chart-key .key::before { content: ""; width: 12px; height: 8px; border-radius: 2px; }
+.chart-key .at-limit::before { background: var(--sun); }
+.chart-key .derating::before { background: var(--ember); }
+#chart, #companion-chart { width: 100%; }
+
+/* The second chart sits under a hairline of its own, so the two read as a
+   pair sharing one time axis rather than as one tall chart. */
+.companion-head {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--hairline);
+}
+
+/* .card-head sets display, which would otherwise outrank the hidden
+   attribute when the registry declares only one chart. */
+.companion-head[hidden] { display: none; }
+
+.chart-tabs {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.chart-tab {
+  height: 28px;
+  padding: 0 10px;
+  border: 1px solid var(--hairline);
+  border-radius: 8px;
+  background: var(--well);
+  color: var(--muted);
+  font: inherit;
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.chart-tab:hover { border-color: var(--faint); }
+
+/* Off is a different kind of choice from the charts, so it stands apart. */
+.chart-tab[data-pane="off"] { margin-left: 8px; }
+
+.chart-tab[aria-pressed="true"] {
+  color: var(--text);
+  border-color: var(--muted);
+  background: color-mix(in srgb, var(--text) 8%, var(--well));
+}
+
+.card-head { flex-wrap: wrap; }
+
+.day-nav {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-right: auto;
+  margin-left: 14px;
+}
+
+.day-nav button {
+  min-width: 28px;
+  height: 28px;
+  padding: 0 8px;
+  border: 1px solid var(--hairline);
+  border-radius: 8px;
+  background: var(--well);
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.day-nav button:hover:not(:disabled) { border-color: var(--faint); }
+
+/* Disabled means there is no earlier or later day with readings, so the
+   arrows never land you on an empty chart. */
+.day-nav button:disabled { opacity: 0.32; cursor: default; }
+
+.day-nav button.text { font-size: 12px; color: var(--muted); }
+
+.day-nav input[type="date"] {
+  height: 28px;
+  padding: 0 8px;
+  border: 1px solid var(--hairline);
+  border-radius: 8px;
+  background: var(--well);
+  color: var(--text);
+  font: inherit;
+  font-size: 12px;
+  color-scheme: dark;
+}
+
+/* Viewing an earlier day: the chart is history, while the cards beside it
+   are still live. Tinting the card edge keeps that from being confusing. */
+.chart-card.historical {
+  border-color: color-mix(in srgb, var(--sun) 35%, var(--hairline));
+}
+
+/* Built from the registry, one entry per series. The line key carries the
+   colour; the name stays in text colour so a light hue never has to be read
+   as text. */
+.legend {
+  font-size: 12px;
+  color: var(--muted);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 12px;
+}
+/* Each entry is a button that switches its line on and off. A line that is
+   off keeps its entry, dimmed, so it can be brought back. */
+.legend .item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+.legend .item:hover { color: var(--text); }
+.legend[hidden] { display: none; }
+.legend .item[aria-pressed="false"] { opacity: 0.45; }
+.legend .key { width: 14px; height: 2px; border-radius: 2px; display: inline-block; }
+
+.muted { color: var(--faint); font-size: 12px; margin: 10px 0 0; }
+
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--faint);
+  padding: 4px 2px 10px;
+}
+
+.footer a { color: color-mix(in srgb, var(--sun) 55%, var(--muted)); text-decoration: none; }
+.footer a:hover { text-decoration: underline; }
+
+/* A reading older than a few intervals is dimmed rather than hidden, so a
+   stalled poller looks stalled instead of looking like a quiet inverter. */
+/* A fault keeps its colour even once the reading goes stale. Losing contact
+   just after the inverter faulted is exactly when you most want to see the
+   last thing it said; the status pill already reports the age separately. */
+body.stale #hero-value,
+body.stale .stat:not(.fault):not(.warn) .reading .live,
+body.stale .stat .reading .top { color: var(--faint); }
+body.stale #updated { color: var(--alert); }
+
+.uplot, .u-wrap { width: 100% !important; }
+.u-legend { font-size: 12px; color: var(--muted); }
+.u-legend .u-marker { border-width: 2px; }
+
+/* Wide displays. Below this the single column is right; above it the column
+   would just be a strip of content in the middle of a black field, so the
+   chart moves alongside the readings and the type grows with the panel. */
+@media (min-width: 1400px) {
+  /* Within a screen, readings take 30% and the charts the rest, on every
+     wide layout. When the chart runs taller than the cards beside it, the
+     extra height goes to the row under the hero, not the hero's own. */
+  .screen {
+    grid-template-columns: minmax(330px, 3fr) minmax(0, 7fr);
+    grid-template-rows: auto 1fr;
+    align-items: start;
+  }
+
+  .screen > .hero { grid-column: 1; grid-row: 1; }
+
+  /* The reading cards stack down the left under the hero, two abreast when
+     the column has room, each as tall as its rows. */
+  .screen > .sections {
+    grid-column: 1;
+    grid-row: 2;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    align-self: start;
+  }
+
+  /* The chart stands beside the readings rather than sitting as a
+     letterbox under them. */
+  .screen > .chart-card {
+    grid-column: 2;
+    grid-row: 1 / 3;
+    align-self: start;
+  }
+}
+
+@media (min-width: 2000px) {
+  .page { gap: 20px; }
+  .screen {
+    gap: 20px;
+    /* The left column now holds two cards across, so its floor rises to
+       keep room for both; its share stays at 30%. */
+    grid-template-columns: minmax(560px, 3fr) minmax(0, 7fr);
+  }
+  /* Two cards abreast rather than a single stack down a wide empty column. */
+  .screen > .sections { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+  body { font-size: 15px; }
+  #hero-value, .period-sum { font-size: 78px; }
+  .stat, .hero-caption, .muted, .pill, .hero-extra .label { font-size: 14px; }
+  .hero-extra .value { font-size: 32px; }
+  .hero-extra.subtle .value { font-size: 17px; }
+  .section-title, .card-head h2 { font-size: 15px; }
+  .identity h1 { font-size: 24px; }
+  .tick { width: 10px; height: 10px; }
+}
+
+/* A 4K panel at 100% scale. The content is allowed to get genuinely large
+   rather than staying a postage stamp in the middle. */
+@media (min-width: 2800px) {
+  .page { gap: 24px; }
+  .screen { gap: 24px; grid-template-columns: minmax(820px, 3fr) minmax(0, 7fr); }
+  /* Two abreast, which squares four cards into a 2x2 block with no hole.
+     Three across would leave the fourth stranded on a row of its own. */
+  .screen > .sections { grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); }
+  body { font-size: 17px; }
+  #hero-value, .period-sum { font-size: 104px; }
+  .stat, .hero-caption, .muted, .pill, .hero-extra .label { font-size: 16px; }
+  .hero-extra .value { font-size: 40px; }
+  .hero-extra.subtle .value { font-size: 20px; }
+  .section-title, .card-head h2 { font-size: 17px; }
+  .identity h1 { font-size: 30px; }
+  .stat { padding: 11px 0; }
+  .tick { width: 12px; height: 12px; }
+  :root { --radius: 18px; }
+}
+
+/* The fault alert sits beside the status pill rather than as a band across
+   the page. It is a button: pressing it reveals the codes below. */
+.topbar-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* Same surface as the status pill beside it. The colour carries in the text,
+   the border and the dot; a filled pill next to an unfilled one reads as two
+   different kinds of component rather than two states of one. */
+.fault-pill {
+  font-size: 12px;
+  max-width: 100%;
+  text-align: left;
+  color: var(--alert);
+  border-color: color-mix(in srgb, var(--alert) 50%, var(--hairline));
+}
+
+.fault-pill[hidden] { display: none; }
+/* A fault radiates faster than a healthy heartbeat. Same gesture as Live, so
+   the pair read as one family, at a pace that says something is wrong. */
+.fault-pill .dot {
+  background: var(--alert);
+  --pulse: var(--alert);
+}
+
+.fault-pill.beat .dot { animation: pulse 1.4s ease-out 1; }
+
+.fault-pill.warn {
+  color: var(--sun);
+  border-color: color-mix(in srgb, var(--sun) 50%, var(--hairline));
+}
+
+.fault-pill.warn .dot { background: var(--sun); --pulse: var(--sun); }
+
+/* On a phone the pill has room for the state but not for three fault
+   descriptions. The codes drop; the alert itself never does. */
+@media (max-width: 700px) {
+  #fault-pill-codes { display: none; }
+}
+
+/* Each tab is a screen holding its own cards, spaced as the page spaces
+   the header, the screen and the footer. */
+.screen { display: grid; gap: 16px; min-width: 0; }
+
+/* Tabs: a bottom bar on a phone, a segmented control in the top bar on a
+   wide screen. Every target is at least 44 px. */
+.tabs { display: flex; gap: 4px; }
+.tabs a {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  min-height: 44px; min-width: 44px; padding: 0 14px;
+  color: var(--faint); text-decoration: none; font-size: 13px;
+  border-radius: 999px;
+}
+.tabs a svg { width: 18px; height: 18px; }
+.tabs a[aria-current="page"] { color: var(--text); background: var(--surface); }
+
+@media (max-width: 899px) {
+  .tabs {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 10;
+    height: calc(56px + env(safe-area-inset-bottom));
+    padding: 0 8px env(safe-area-inset-bottom);
+    background: var(--night); border-top: 1px solid var(--hairline);
+    justify-content: space-around;
+  }
+  .tabs a { flex-direction: column; gap: 2px; font-size: 11px; border-radius: 0; flex: 1; position: relative; }
+  .tabs a[aria-current="page"] { background: none; }
+  .tabs a[aria-current="page"]::before {
+    content: ""; position: absolute; top: 0; left: 30%; right: 30%; height: 2px; background: var(--sun);
+  }
+  .page { padding-bottom: calc(72px + env(safe-area-inset-bottom)); }
+}
+
+.screen[hidden] { display: none; }
+.hero-line { margin: 6px 0 0; font-size: 13px; color: var(--muted); }
+.hero-line:empty, .hero-line[hidden] { display: none; }
+
+/* Month and Year: a summary hero card, with the period's name between its
+   arrows and the total leading, because it is the question a period view
+   is opened for; and the bars in a card of their own. */
+.period-head { display: flex; }
+.period-head .day-nav { margin: 0 auto; gap: 12px; }
+.period-title { min-width: 9em; text-align: center; font-size: 15px; margin: 0; }
+.period-caption { margin: 18px 0 0; font-size: 12px; color: var(--muted); }
+.period-sum { font-weight: 700; line-height: 1; letter-spacing: -0.02em; }
+.period-average { margin: 0; font-size: 14px; color: var(--muted); }
+.bars { width: 100%; }
+.period-body[hidden], .period-empty[hidden], .period-comparison[hidden], .bars-card[hidden], .tiles[hidden], .tile-detail[hidden] { display: none; }
+.period-empty { text-align: center; padding: 28px 0 12px; color: var(--muted); }
+.period-empty .day-nav { margin: 0; }
+
+/* A period's figures, one tile each, led by the value. Tiles in a row that
+   is not full widen to fill it, so an odd count leaves no hole. */
+.tiles { display: flex; flex-wrap: wrap; gap: 16px; }
+.tiles:empty { display: none; }
+.tile { flex: 1 1 140px; padding: 14px 16px; min-width: 0; }
+/* A label or detail too long for a narrow tile wraps into even lines rather
+   than leaving one word on a line of its own. */
+.tile-label, .tile-detail { text-wrap: balance; }
+.tile-label { margin: 0; font-size: 12px; color: var(--muted); }
+/* Figures are history, so they keep full colour when the live reading goes
+   stale. Units sit small beside the numbers, as in the hero. */
+.tile-value { margin: 6px 0 0; font-size: 24px; font-weight: 600; letter-spacing: -0.01em; color: var(--text); }
+.tile-value .unit { font-size: 12px; font-weight: 400; color: var(--faint); }
+.tile-detail { margin: 4px 0 0; font-size: 12px; color: var(--faint); }
+
+/* On a computer the page takes the whole width of the window. A period's
+   summary and tiles stack down the left, as Home's hero and cards do, and
+   the bars stand beside both, down to the footer or the last tile, so
+   neither column leaves a gap. An empty period's summary spans both. */
+@media (min-width: 900px) {
+  .page { max-width: none; }
+  .screen[data-screen="month"], .screen[data-screen="year"] {
+    grid-template-columns: minmax(320px, 3fr) minmax(0, 7fr);
+    grid-template-rows: auto 1fr;
+    align-items: start;
+  }
+  .screen > .summary-card { grid-column: 1; grid-row: 1; }
+  .screen > .tiles { grid-column: 1; grid-row: 2; }
+  .screen > .bars-card { grid-column: 2; grid-row: 1 / 3; }
+  .screen.empty > .summary-card { grid-column: 1 / -1; }
+}
+
+@media (min-width: 2000px) {
+  .tile { flex-basis: 170px; }
+  .tile-label, .tile-detail { font-size: 14px; }
+  .tile-value { font-size: 30px; }
+}
+
+@media (min-width: 2800px) {
+  .tiles { gap: 24px; }
+  .tile { flex-basis: 220px; padding: 18px 20px; }
+  .tile-label, .tile-detail { font-size: 16px; }
+  .tile-value { font-size: 38px; }
+  .tile-value .unit { font-size: 16px; }
+}
+
+/* Cards in place with faint bars where the numbers will be, so the layout
+   does not jump when data lands. No spinner. */
+.loading .reading .live, .loading #hero-value, .loading .period-sum {
+  color: transparent;
+  background: linear-gradient(var(--hairline), var(--hairline)) center / 60% 0.7em no-repeat;
+}
+
+/* A pull at the top of the page must not bounce into the browser's own
+   refresh: the live stream keeps the page current. */
+body { overscroll-behavior-y: none; }
+
+/* On a touch screen every control is at least 44 px square. */
+@media (pointer: coarse) {
+  .day-nav button, .day-nav input[type="date"], .legend .item, .chart-tab {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  .footer a { display: inline-flex; align-items: center; min-height: 44px; }
+}
+

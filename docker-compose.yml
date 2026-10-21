@@ -1,0 +1,29 @@
+services:
+  solax:
+    build: .
+    container_name: solax
+    # The inverter sits on the LAN and the page is opened from other devices
+    # on that same LAN, so the container shares the host network.
+    network_mode: host
+
+    # Run as the user that owns config.toml. That file holds the dongle serial,
+    # which is the local API password, so it is mode 0600 and readable only by
+    # its owner. The image's own unprivileged user has a different uid and
+    # would be refused. Override for a uid other than 1000:
+    #   SOLAX_UID=$(id -u) SOLAX_GID=$(id -g) docker compose up --build
+    user: "${SOLAX_UID:-1000}:${SOLAX_GID:-1000}"
+
+    environment:
+      TZ: Asia/Kolkata
+      RUST_LOG: solax_server=info
+
+    volumes:
+      # The database lives here.
+      # The z suffix relabels for SELinux, which Fedora enforces by default
+      # and which denies bind mounts that carry no container label.
+      - ./solax-data:/app/solax-data:z
+      - ./config.toml:/app/config.toml:ro,z
+      # The registry this server reads. solax-rs needs its own; never share one file between them.
+      - ./server/metrics.toml:/app/metrics.toml:ro,z
+
+    restart: unless-stopped

@@ -1,0 +1,202 @@
+# Every metric the page knows about is declared here and nowhere else.
+#
+# Adding one is a block under its section, then a restart. On boot the app
+# adds a virtual generated column over the stored raw array, which costs no
+# table rewrite and reads correctly for samples written long before the block
+# existed. The README's "Adding a metric" section explains each field.
+#
+# key       lowercase name, also its database column
+# label     wording in its card
+# unit      shown after the value; leave out for none
+# index     slot in the Data array, or [low, high] when the number needs two
+# signed    the number can go below zero
+# scale     size of one count in the unit; defaults to 1
+# decimals  digits shown after the point; defaults to 0
+# chart     "name", or { name = "...", hidden = true } to start switched off
+# peak      "all_day" or "while_producing"; shows today's high and marks it
+# feature   "wording" on the hero card, or { label = "...", subtle = true }
+# summary   wording for the closing value in a past day's caption
+# note      small print under the label
+#
+# Sections go on the page in the order solar, grid, inverter, and metrics in
+# the order written within each. Charts take their tab order from the first
+# metric that names them.
+
+# The metric whose line tells the page when the plant is producing. It needs
+# a chart, and that chart is the main one.
+hero = "pv_power"
+
+# The metric holding the inverter's run mode, which drives the fault badge.
+run_mode = "run_mode"
+
+# The metric holding the inverter's own count of today's yield, which starts
+# from zero each morning. Day summaries and the projection read it.
+daily_yield = "today_kwh"
+
+# The metric holding the inverter's lifetime yield counter.
+lifetime_yield = "total_kwh"
+
+# Optional. The metric counting down the seconds before the inverter
+# connects to the grid, each morning and after a fault. The hero card says
+# so while it counts, and the cards leave it out, since it reads zero the
+# rest of the time.
+grid_countdown = "grid_countdown"
+
+# Optional. The power the inverter delivers, in W. Its output limit caps this
+# figure, not the panels' own power, which runs higher by the inverter's
+# losses; so time at the limit, the chart's marks and the hero's meter
+# measure it. Without it they measure the hero.
+output = "ac_power"
+
+# Optional. The metrics that show the inverter stepping its output down when
+# it runs too hot, which it never reports itself: the power it delivers, in
+# W, the panel voltage, in V, and its temperature, in C. Day summaries count
+# each step and its length; config.toml says the level it steps down to.
+[derating]
+output = "ac_power"
+panel_voltage = "pv_volts"
+temperature = "inverter_temperature"
+
+# --- Solar -----------------------------------------------------------------
+
+[[solar]]
+key = "pv_volts"
+label = "Voltage"
+unit = "V"
+index = 4
+scale = 0.1
+decimals = 1
+chart = "voltage"
+# Idle panels sit at open circuit, which reads higher than any operating
+# voltage, so only producing samples count toward the peak.
+peak = "while_producing"
+
+[[solar]]
+key = "pv_amps"
+label = "Current"
+unit = "A"
+index = 8
+scale = 0.1
+decimals = 1
+chart = "current"
+peak = "all_day"
+
+[[solar]]
+key = "pv_power"
+label = "Power"
+unit = "W"
+index = 13
+chart = "power"
+peak = "all_day"
+
+[[solar]]
+key = "today_kwh"
+label = "Today"
+unit = "kWh"
+index = 21
+scale = 0.1
+decimals = 1
+# The day's running total, read off the power chart's right axis. The
+# register counts in 0.1 kWh steps, so the line climbs as a staircase, and
+# its last point is the figure on the hero card. It starts switched off;
+# its legend entry brings it in.
+chart = { name = "power", hidden = true }
+feature = "Generated today"
+summary = "generated"
+
+[[solar]]
+key = "total_kwh"
+label = "All time"
+unit = "kWh"
+index = [19, 20]
+scale = 0.1
+decimals = 1
+summary = "lifetime"
+
+# --- Grid ------------------------------------------------------------------
+
+[[grid]]
+key = "ac_volts"
+label = "Voltage"
+unit = "V"
+index = 0
+scale = 0.1
+decimals = 1
+chart = "voltage"
+peak = "all_day"
+
+[[grid]]
+key = "ac_amps"
+label = "Current"
+unit = "A"
+index = 1
+signed = true
+scale = 0.1
+decimals = 1
+chart = "current"
+peak = "all_day"
+
+[[grid]]
+key = "ac_power"
+label = "Power"
+unit = "W"
+index = 3
+signed = true
+chart = "power"
+peak = "all_day"
+
+[[grid]]
+key = "grid_frequency"
+label = "Frequency"
+unit = "Hz"
+index = 2
+scale = 0.01
+decimals = 2
+
+# --- Inverter --------------------------------------------------------------
+
+[[inverter]]
+key = "inverter_temperature"
+label = "Temperature"
+unit = "C"
+index = 23
+chart = "temperature"
+peak = "all_day"
+
+[[inverter]]
+key = "run_mode"
+label = "Run mode"
+index = 10
+
+[[inverter]]
+key = "rated_power"
+label = "Rated power"
+unit = "W"
+index = 22
+note = "Constant on this unit"
+
+[[inverter]]
+key = "secondary_temperature"
+label = "Second temperature"
+unit = "C"
+index = 24
+chart = "temperature"
+peak = "all_day"
+note = "Unconfirmed, likely the control board"
+
+# Counts down from about 60 in steps of 5 before the inverter feeds the grid.
+[[inverter]]
+key = "grid_countdown"
+label = "Connecting to the grid in"
+unit = "s"
+index = 25
+
+# Rises by one every six minutes while the inverter runs, about 122 a day.
+[[inverter]]
+key = "running_hours"
+label = "Running hours"
+unit = "h"
+index = 28
+scale = 0.1
+decimals = 1
+note = "Counted by the inverter since it was installed"

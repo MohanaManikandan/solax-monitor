@@ -1,0 +1,7 @@
+target
+server/data
+server/config.toml
+config.toml
+solax-data
+ui/dist
+ui/node_modules

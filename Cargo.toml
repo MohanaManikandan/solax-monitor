@@ -1,0 +1,6 @@
+[workspace]
+members = ["crates/solax-api", "server"]
+resolver = "2"
+
+[profile.release]
+strip = true

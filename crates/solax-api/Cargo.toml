@@ -1,0 +1,12 @@
+[package]
+name = "solax-api"
+version = "0.1.0"
+edition = "2021"
+license = "AGPL-3.0-only"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+ts-rs = "10"
+
+[dev-dependencies]
+serde_json = "1"

@@ -1,0 +1,20 @@
+# Development only. Binds loopback, so the placeholder token is accepted, and
+# points at an address nothing answers on, so it never polls the real dongle
+# while the running monitor does.
+[inverter]
+address = "127.0.0.1:9"
+dongle_serial = "DEVELOPMENT"
+poll_from = "05:00"
+poll_until = "19:00"
+max_output_kw = 3.3
+
+[server]
+bind = "127.0.0.1:8081"
+token = "change-me"
+
+[storage]
+database_path = "data/solax.db"
+timezone = "Asia/Kolkata"
+
+[site]
+panel_kwp = 3.665

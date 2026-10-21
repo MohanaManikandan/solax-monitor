@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>SolaX</title>
+</head>
+<body>
+<main class="page">
+  <header class="topbar">
+    <div class="identity">
+      <h1>SolaX</h1>
+      <p id="subtitle">X1-Mini-G4 on your local network</p>
+    </div>
+    <nav class="tabs" id="tabs" aria-label="Screens"></nav>
+    <div class="topbar-status">
+      <div class="pill fault-pill" id="fault-pill" role="status" hidden>
+        <span class="dot"></span><span id="fault-pill-text">Fault</span><span id="fault-pill-codes"></span>
+      </div>
+      <div class="pill" id="status"><span class="dot"></span><span id="status-text">Connecting</span></div>
+    </div>
+  </header>
+  <div id="screens"></div>
+  <footer class="footer">
+    <span id="footer-note">Loading history.</span>
+    <a id="export" href="#">Download today as CSV</a>
+  </footer>
+</main>
+<script type="module" src="/src/main.ts"></script>
+</body>
+</html>
