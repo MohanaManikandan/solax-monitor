@@ -278,11 +278,6 @@ One row per poll in `samples`, holding the full `Data` array as JSON plus `sn`,
 timezone, because a UTC day on `Asia/Kolkata` would start at 05:30 local and cut
 the solar curve in the middle of the morning.
 
-Older rows imported from the Tk app's CSV files carry `source = 'csv'` and a
-rebuilt array with JSON null at every index the CSV could not speak to, so an
-unknown metric reads NULL rather than a convincing zero. The import itself is
-gone; those rows stay as history.
-
 ## Faults
 
 A faulted reply carries an `Error` object alongside `Data`:
