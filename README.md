@@ -17,6 +17,19 @@ See [`server/README.md`](server/README.md) for server configuration, the metrics
 > [!IMPORTANT]
 > This is tested with the **SolaX X1 Mini G4 inverter configured for a maximum output of 3.3KW**. Compatibility with other SolaX inverter models has not been verified.
 
+## Architecture
+
+The monitor separates telemetry collection, persistence, and delivery to browser clients.
+
+![SolaX Monitor architecture](docs/images/architecture.png)
+
+- **Polling:** A single poller collects telemetry from the inverter over the local network at five-second intervals.
+- **Persistence:** SQLite stores raw readings and daily summaries for historical analysis.
+- **HTTP API:** Serves current readings, historical data, and summaries to the dashboard.
+- **Server-Sent Events (SSE):** Streams live updates to connected browser clients without requiring a bidirectional WebSocket connection.
+
+The poller is independent of the number of connected clients, and both live monitoring and historical analysis use the same persisted telemetry.
+
 ### Thermal derating: from diagnosis to measurable results
 
 By correlating live inverter telemetry with temperature and power output, I identified a thermal derating behaviour: at around **85°C, the inverter steps down to 75% of its configured maximum output**.
