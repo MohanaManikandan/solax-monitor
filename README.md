@@ -66,6 +66,17 @@ docker compose up -d --build
 
 Create `server/config.toml` from `server/config.toml.example` and configure it for your inverter. The server also reads `server/metrics.toml` and stores its database in `solax-data/`, which must be writable by the user running the container.
 
+## Public demo (Cloudflare Pages)
+
+The frontend has a self-contained demo mode backed entirely by deterministic synthetic telemetry. It generates a full year of five-minute historical readings in the visitor’s browser timezone, including cloud-cover dips, periods at the configured 3.3 kW output ceiling, and occasional thermal-derating events (up to 85°C, with output limited near 2.4 kW). Live values follow the browser’s current local time and update every five seconds. The demo uses the same screens, charts, navigation, summaries, typical-day curve, and CSV export as the normal app; it does not fetch data from the inverter or backend.
+
+To run the demo locally:
+
+```sh
+cd ui
+VITE_DEMO_MODE=true npm run dev
+```
+
 ## Developing
 
 The server serves the frontend from `ui/dist`, so build it first:

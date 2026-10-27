@@ -1,6 +1,7 @@
 import "./styles/uplot.css";
 import "./styles/main.css";
 import { BrowserTransport } from "./api/browser";
+import { DemoTransport } from "./api/demo";
 import { contextFrom } from "./app/context";
 import { Controller } from "./app/controller";
 import { parseRoute, paintTabs, type Route, type Tab } from "./app/router";
@@ -15,7 +16,9 @@ import { createYear } from "./screens/year";
 import type { Screen } from "./screens/screen";
 
 async function start(): Promise<void> {
-  const transport = new BrowserTransport();
+  const demoMode = import.meta.env.VITE_DEMO_MODE === "true";
+  const transport = demoMode ? new DemoTransport() : new BrowserTransport();
+  if (demoMode) document.documentElement.dataset.demo = "true";
   const context = contextFrom(transport, await transport.registry());
   const today = new TodayTracker(localDate(Date.now() / 1000, context.timezone), context.timezone);
   const state = new AppState(new DaysIndex((from, to) => transport.days(from, to)), today);

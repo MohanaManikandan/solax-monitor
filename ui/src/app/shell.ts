@@ -64,8 +64,13 @@ export function startShell(context: Context, state: AppState): void {
   const footerNote = byId("footer-note");
   const exportLink = byId<HTMLAnchorElement>("export");
 
+  const isDemo = document.documentElement.dataset.demo === "true";
   const serial = context.registry.site.inverter_serial;
-  if (serial) byId("subtitle").textContent = serial + " on your local network";
+  if (isDemo) {
+    byId("subtitle").textContent = "Synthetic telemetry · browser-local time";
+  } else if (serial) {
+    byId("subtitle").textContent = serial + " on your local network";
+  }
 
   const paintStatus = () => {
     // Until the present has been asked for, the pill keeps saying Connecting.
@@ -81,7 +86,7 @@ export function startShell(context: Context, state: AppState): void {
     });
     // Only the state classes change, so a pulse under way is not cut short.
     for (const kind of ["live", "stale", "asleep", "error"]) status.classList.toggle(kind, kind === current.kind);
-    statusText.textContent = current.text;
+    statusText.textContent = isDemo && current.kind === "live" ? "Demo" : current.text;
     document.body.classList.toggle("stale", current.stale);
   };
 
@@ -123,14 +128,20 @@ export function startShell(context: Context, state: AppState): void {
       second: "2-digit",
     });
     // How much is kept, and the room it takes, for a sense of how it grows.
-    footerNote.textContent =
-      "History back to " + since + " (" + now.stored.toLocaleString() + " readings so far, " + formatBytes(now.storage_bytes) + " on disk)";
+    footerNote.textContent = isDemo
+      ? "Synthetic history back to " + since + " (" + now.stored.toLocaleString() + " simulated readings)"
+      : "History back to " + since + " (" + now.stored.toLocaleString() + " readings so far, " + formatBytes(now.storage_bytes) + " on disk)";
   };
 
   const paintExport = () => {
     exportLink.href = context.transport.exportUrl(state.selectedDate);
     exportLink.textContent = state.isToday() ? "Download today as CSV" : "Download " + state.selectedDate + " as CSV";
   };
+  // In demo mode the CSV is a browser-created snapshot, so refresh today's
+  // blob at click time rather than rebuilding it on every live UI update.
+  exportLink.addEventListener("click", () => {
+    if (isDemo) exportLink.href = context.transport.exportUrl(state.selectedDate, true);
+  });
 
   // The dots pulse once per reading rather than forever, so the screen is
   // not redrawn every frame. Restarting an animation needs the class

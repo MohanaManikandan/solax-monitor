@@ -17,5 +17,5 @@ export interface Transport {
   days(from: string, to: string): Promise<DaySummary[]>;
   /** Opens the live stream and returns what closes it. */
   openLive(handlers: LiveHandlers): () => void;
-  exportUrl(date: string): string;
+  exportUrl(date: string, refresh?: boolean): string;
 }
