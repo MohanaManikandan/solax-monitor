@@ -2,6 +2,9 @@
 
 A self-hosted SolaX inverter monitor. It polls the inverter over the local network, stores readings in SQLite, and serves a web dashboard for live power, energy generation, and historical trends.
 
+**[Live Demo](https://solax-monitor.pages.dev/)** ·
+Interactive dashboard powered by synthetic data; no inverter connection required.
+
 ![Solax Dashboard](docs/images/dashboard.png)
 
 The project is organised as a Rust workspace with a server, shared API types, and a TypeScript frontend.
